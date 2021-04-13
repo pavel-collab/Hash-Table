@@ -6,15 +6,17 @@
 #include "hash_table.h"
 
 // создание ячейки списка; ячейка встает на голову списка
-int list_insert(List** lst, char* str) {
-    List* box = malloc(sizeof(List));
-
+List* list_insert(List* head, char* str) {
+    List* box = (List*) malloc(sizeof(List));
     box->string = str;
+    printf("\n %s \n", box->string);
+    box->next = head;
+    printf("~~~~~~~~~~~~~~~~~~~~\n");
+    printf("box [%x]\n", box);
+    printf("box->next [%x]\n", box->next);
+    printf("~~~~~~~~~~~~~~~~~~~~\n");
 
-    box->next = *lst;
-    *lst = box;
-
-    return 0;
+    return box;
 }
 
 // удаление списка
@@ -69,15 +71,16 @@ int ht_dump(HashTable* ht) {
     else {
         printf("HT (OK)\n\n");
         printf("Table ptr [%x]\n", ht);
+        printf("List array ptr [%x]\n", ht->table);
         printf("Table size = %lld\n\n", ht->size);
 
         for (long long i = 0; i < ht->size; i++) {
-            printf("list[%lld]: ", i);
+            printf("list(%lld) [%x] ", i, &ht->table[i]);
             list_dump(ht->table[i]);
         }
     }
 
-    printf("\nDUMP end.\n");
+    printf("\nDUMP end.\n\n");
 
     return 0;
 }
@@ -119,12 +122,11 @@ int ht_insert(HashTable* ht, char* str) {
 
     if (lst) {
         printf("This key already in table.\n");
-        free(lst);
         return 0;
     }
 
-    list_insert(&lst, str);
-    ht->table[rot13(str) % ht->size] = lst;
+    List* head = ht->table[rot13(str) % ht->size];
+    ht->table[rot13(str) % ht->size] = list_insert(head, str);
 
     ht_dump(ht);
 
