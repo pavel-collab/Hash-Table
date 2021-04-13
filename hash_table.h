@@ -13,4 +13,11 @@ typedef struct _HashTable {
 
 } HashTable;
 
+#define DUMP(ht_name) {\
+    FILE* log_txt = fopen("log.txt", "a"); \
+    assert(log_txt != NULL); \
+    ht_dump((ht_name), log_txt); \
+    fclose(log_txt);\
+}
+
 #endif /*_HASH_TABLE_H*/

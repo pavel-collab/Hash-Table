@@ -1,3 +1,4 @@
 *.o
 *.exe
 sundbox.c
+log.txt

@@ -50,38 +50,38 @@ unsigned int rot13(char* str) {
     return hash;
 }
 
-int list_dump(List* lst) {
+int list_dump(List* lst, FILE* log) {
 
     while (lst != NULL) {
 
-        printf("%s -> ", lst->string);
+        fprintf(log, "%s -> ", lst->string);
         lst = lst->next;
     }
-    printf("NULL\n");
+    fprintf(log, "NULL\n");
     return 0;
 }
 
-int ht_dump(HashTable* ht) {
+int ht_dump(HashTable* ht, FILE* log) {
 
-    printf("\n-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n");
-    printf("\nHash Table DUMP\n");
+    fprintf(log, "\n-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n");
+    fprintf(log, "\nHash Table DUMP\n");
     if (ht == NULL) {
-        printf("HT (ERR) (null ptr)\n");
+        fprintf(log, "HT (ERR) (null ptr)\n");
     }
     else {
-        printf("HT (OK)\n\n");
-        printf("Table ptr [%x]\n", ht);
-        printf("List array ptr [%x]\n", ht->table);
-        printf("Table size = %lld\n\n", ht->size);
+        fprintf(log, "HT (OK)\n\n");
+        fprintf(log, "Table ptr [%x]\n", ht);
+        fprintf(log, "List array ptr [%x]\n", ht->table);
+        fprintf(log, "Table size = %lld\n\n", ht->size);
 
         for (long long i = 0; i < ht->size; i++) {
-            printf("list(%lld) [%x] ", i, &ht->table[i]);
-            list_dump(ht->table[i]);
+            fprintf(log, "list(%lld) [%x] ", i, &ht->table[i]);
+            list_dump(ht->table[i], log);
         }
     }
 
-    printf("\nDUMP end.\n\n");
-    printf("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n\n");
+    fprintf(log, "\nDUMP end.\n\n");
+    fprintf(log, "-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n\n");
 
     return 0;
 }
@@ -177,18 +177,18 @@ int main() {
     printf("start of program\n");
 
     HashTable ht = {NULL, 0};
-    long long size = 10;
+    long long size = 5;
     ht_init(&ht, size);
 
     char* str = (char*) calloc(10, sizeof(char));
-    for (int i = 0; i < size - 7; i++) {
+    for (int i = 0; i < 7; i++) {
         printf("input string: ");
         gets(str);
 
         ht_insert(&ht, str);
     }
 
-    ht_dump(&ht);
+    DUMP(&ht);
 
     ht_search(&ht, "aaa");
     ht_search(&ht, "bbb");
@@ -211,7 +211,7 @@ int main() {
 
 //TODO: извлечение всей цепочки по заданному хэшу
 
-//TODO: dump
+//* dump
 
 //TODO: history log:
 //! классы ++
