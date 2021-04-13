@@ -39,6 +39,7 @@ unsigned int rot13(char* str) {
         hash += (unsigned char)(*str);
         hash += (hash << 10);
 	    hash ^= (hash >> 6); // побитовый XOR в совмещении с присваиванием
+        str++;
     }
 
     hash += (hash << 3);
@@ -49,9 +50,9 @@ unsigned int rot13(char* str) {
 }
 
 // создание хэш-таблицы
-int ht_init(HashTable* ht, long int size) {
+int ht_init(HashTable* ht, long long size) {
 
-    ht->table = (List**) calloc(sizeof(List*), size); //! <-
+    ht->table = (List**) calloc(size, sizeof(List*));
     assert(ht->table != NULL);
 
     ht->size = size;
@@ -65,7 +66,7 @@ List* ht_lookup(HashTable* ht, char* str) {
     unsigned int hash = rot13(str);
     List* lst = ht->table[hash % ht->size]; // встали на нужный список
 
-    while ((strcmp(lst->string, str) == 0) || (lst == NULL)) {
+    while ((lst != NULL) && (strcmp(lst->string, str) != 0)) {
         lst = lst->next;
     }
 
@@ -102,9 +103,8 @@ int ht_search(HashTable* ht, char* str) {
     else {
         printf("data: ");
         puts(lst->string);
-        printf("\n");
-
-        printf("hash = %u", rot13(lst->string));
+        printf("hash = [%x]\n", rot13(lst->string));
+        
         return 0;
     }
 }
@@ -133,31 +133,64 @@ int ht_free(HashTable* ht) {
     free(ht);
 }
 
+int list_dump(List* lst) {
+
+    while (lst != NULL) {
+
+        printf("%s -> ", lst->string);
+        lst = lst->next;
+    }
+    printf("NULL\n");
+    return 0;
+}
+
+int ht_dump(HashTable* ht) {
+
+    printf("\nHash Table DUMP\n");
+    if (ht == NULL) {
+        printf("HT (ERR) (null ptr)\n");
+    }
+    else {
+        printf("HT (OK)\n\n");
+        printf("Table ptr [%x]\n", ht);
+        printf("Table size = %lld\n\n", ht->size);
+
+        for (long long i = 0; i < ht->size; i++) {
+            printf("list[%lld]: ", i);
+            list_dump(ht->table[i]);
+        }
+    }
+
+    printf("\nDUMP end.\n");
+
+    return 0;
+}
+
 int main() {
 
     printf("start of program\n");
 
-    HashTable* ht = NULL;
-    long int size = 10;
-    ht_init(ht, size);
-    printf("ht init\n");
+    HashTable ht = {NULL, 0};
+    long long size = 10;
+    ht_init(&ht, size);
 
-    char* str = NULL;
-    for (int i = 0; i < size - 6; i++) {
+    char* str = (char*) calloc(10, sizeof(char));
+    for (int i = 0; i < size - 7; i++) {
         printf("input string: ");
         gets(str);
-        printf("hash = %u\n", rot13(str));
+        printf("hash = %x, idx = [%d]\n", rot13(str), rot13(str) % ht.size);
 
-        ht_insert(ht, str);
-        str = NULL;
+        ht_insert(&ht, str);
     }
 
-    ht_search(ht, "aaa");
-    ht_search(ht, "bbb");
-    ht_search(ht, "ccc");
+    ht_dump(&ht);
 
-    ht_free(ht);
-    printf("end of program\n");
+    ht_search(&ht, "aaa");
+    ht_search(&ht, "bbb");
+    ht_search(&ht, "ccc");
+
+    ht_free(&ht);
+    printf("\nend of program\n");
 
     return 0;
 }
@@ -165,6 +198,7 @@ int main() {
 //* ht struct
 //* hash table construct
 //* hash table distruct
+//TODO: верефикатор (проверка, все строки в списке имеют один хэш)
 //TODO: hash functions (one more)
 //TODO: fillfactor       |
 //TODO: ht realloc up    |
@@ -173,7 +207,11 @@ int main() {
 //TODO: извлечение всей цепочки по заданному хэшу
 
 //TODO: dump
-//TODO: history log
+
+//TODO: history log:
+//! классы ++
+//! хранение последней примененной функции; ссылки на функции -> один !!!прототип фукции!!!
+
 //TODO: вариант решения коллизий спомощью открытой адресации
 
 //TODO: unit test
