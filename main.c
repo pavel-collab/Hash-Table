@@ -8,13 +8,12 @@
 // создание ячейки списка; ячейка встает на голову списка
 List* list_insert(List* head, char* str) {
     List* box = (List*) malloc(sizeof(List));
-    box->string = str;
-    printf("\n %s \n", box->string);
+
+    char* list_str = (char*) calloc(strlen(str), sizeof(char));
+    strcpy(list_str, str);
+
+    box->string = list_str;
     box->next = head;
-    printf("~~~~~~~~~~~~~~~~~~~~\n");
-    printf("box [%x]\n", box);
-    printf("box->next [%x]\n", box->next);
-    printf("~~~~~~~~~~~~~~~~~~~~\n");
 
     return box;
 }
@@ -64,6 +63,7 @@ int list_dump(List* lst) {
 
 int ht_dump(HashTable* ht) {
 
+    printf("\n-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n");
     printf("\nHash Table DUMP\n");
     if (ht == NULL) {
         printf("HT (ERR) (null ptr)\n");
@@ -81,6 +81,7 @@ int ht_dump(HashTable* ht) {
     }
 
     printf("\nDUMP end.\n\n");
+    printf("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n\n");
 
     return 0;
 }
@@ -101,16 +102,10 @@ List* ht_lookup(HashTable* ht, char* str) {
 
     unsigned int hash = rot13(str);
     List* lst = ht->table[hash % ht->size]; // встали на нужный список
-    printf("==========================\n");
-    printf("hash = [%x], idx = %d\n", hash, hash % ht->size);
-    printf("list adr [%x]\n", lst);
 
     while ((lst != NULL) && (strcmp(lst->string, str) != 0)) {
         lst = lst->next;
     }
-
-    printf("returned lst is [%x]\n", lst);
-    printf("==========================\n");
 
     return lst;
 }
@@ -127,8 +122,6 @@ int ht_insert(HashTable* ht, char* str) {
 
     List* head = ht->table[rot13(str) % ht->size];
     ht->table[rot13(str) % ht->size] = list_insert(head, str);
-
-    ht_dump(ht);
 
     return 0;
 }
@@ -191,7 +184,6 @@ int main() {
     for (int i = 0; i < size - 7; i++) {
         printf("input string: ");
         gets(str);
-        printf("hash = %x, idx = [%d]\n", rot13(str), rot13(str) % ht.size);
 
         ht_insert(&ht, str);
     }
