@@ -49,90 +49,6 @@ unsigned int rot13(char* str) {
     return hash;
 }
 
-// создание хэш-таблицы
-int ht_init(HashTable* ht, long long size) {
-
-    ht->table = (List**) calloc(size, sizeof(List*));
-    assert(ht->table != NULL);
-
-    ht->size = size;
-
-    return 0;
-}
-
-// поиск элемента в таблице
-List* ht_lookup(HashTable* ht, char* str) {
-
-    unsigned int hash = rot13(str);
-    List* lst = ht->table[hash % ht->size]; // встали на нужный список
-
-    while ((lst != NULL) && (strcmp(lst->string, str) != 0)) {
-        lst = lst->next;
-    }
-
-    return lst;
-}
-
-// вставка элемента в таблицу
-int ht_insert(HashTable* ht, char* str) {
-
-    List* lst = ht_lookup(ht, str);
-
-    if (lst) {
-        printf("This key already in table.\n");
-        free(lst);
-        return 0;
-    }
-
-    list_insert(&lst, str);
-    ht->table[rot13(str) % ht->size] = lst;
-
-    return 0;
-}
-
-//???
-int ht_search(HashTable* ht, char* str) {
-
-    List* lst = ht_lookup(ht, str);
-
-    if (lst == NULL) {
-        printf("There is no such element in the table\n");
-        free(lst);
-        return 0;
-    }
-    else {
-        printf("data: ");
-        puts(lst->string);
-        printf("hash = [%x]\n", rot13(lst->string));
-        
-        return 0;
-    }
-}
-
-//???
-/*int ht_remove(HashTable* ht, char* str) {
-
-    List* lst = ht_lookup(ht, str);
-
-    if (lst == NULL) {
-        printf("There is no such element in the table\n");
-        free(lst);
-        return 0;
-    }
-
-
-}*/
-
-// удаление таблицы
-int ht_free(HashTable* ht) {
-
-    for (int i = 0; i < ht->size; i++) {
-        list_free(ht->table[i]);
-    }
-    free(ht->table);
-    free(ht);
-}
-
 int list_dump(List* lst) {
 
     while (lst != NULL) {
@@ -163,6 +79,101 @@ int ht_dump(HashTable* ht) {
 
     printf("\nDUMP end.\n");
 
+    return 0;
+}
+
+// создание хэш-таблицы
+int ht_init(HashTable* ht, long long size) {
+
+    ht->table = (List**) calloc(size, sizeof(List*));
+    assert(ht->table != NULL);
+
+    ht->size = size;
+
+    return 0;
+}
+
+// поиск элемента в таблице
+List* ht_lookup(HashTable* ht, char* str) {
+
+    unsigned int hash = rot13(str);
+    List* lst = ht->table[hash % ht->size]; // встали на нужный список
+    printf("==========================\n");
+    printf("hash = [%x], idx = %d\n", hash, hash % ht->size);
+    printf("list adr [%x]\n", lst);
+
+    while ((lst != NULL) && (strcmp(lst->string, str) != 0)) {
+        lst = lst->next;
+    }
+
+    printf("returned lst is [%x]\n", lst);
+    printf("==========================\n");
+
+    return lst;
+}
+
+// вставка элемента в таблицу
+int ht_insert(HashTable* ht, char* str) {
+
+    List* lst = ht_lookup(ht, str);
+
+    if (lst) {
+        printf("This key already in table.\n");
+        free(lst);
+        return 0;
+    }
+
+    list_insert(&lst, str);
+    ht->table[rot13(str) % ht->size] = lst;
+
+    ht_dump(ht);
+
+    return 0;
+}
+
+//???
+int ht_search(HashTable* ht, char* str) {
+
+    List* lst = ht_lookup(ht, str);
+
+    if (lst == NULL) {
+        printf("There is no such element in the table\n");
+        free(lst);
+        return 0;
+    }
+    else {
+        printf("data: ");
+        puts(lst->string);
+        printf("hash = [%x]\n", rot13(lst->string));
+
+        return 0;
+    }
+}
+
+//???
+/*int ht_remove(HashTable* ht, char* str) {
+
+    List* lst = ht_lookup(ht, str);
+
+    if (lst == NULL) {
+        printf("There is no such element in the table\n");
+        free(lst);
+        return 0;
+    }
+
+
+}*/
+
+// удаление таблицы
+int ht_free(HashTable* ht) {
+
+    for (int i = 0; i < ht->size; i++) {
+        list_free(ht->table[i]);
+    }
+    free(ht->table);
+    free(ht);
+
+    printf("Hash table has been removed successful!\n");
     return 0;
 }
 
