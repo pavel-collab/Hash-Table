@@ -140,7 +140,6 @@ int ht_search(HashTable* ht, char* str) {
 
     if (lst == NULL) {
         printf("There is no such element in the table\n");
-        free(lst);
         return 0;
     }
     else {
@@ -173,8 +172,6 @@ int ht_free(HashTable* ht) {
         list_free(ht->table[i]);
     }
     free(ht->table);
-    free(ht);
-
     printf("Hash table has been removed successful!\n");
     return 0;
 }
