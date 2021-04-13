@@ -5,31 +5,6 @@
 
 #include "hash_table.h"
 
-// создание ячейки списка; ячейка встает на голову списка
-List* list_insert(List* head, char* str) {
-    List* box = (List*) malloc(sizeof(List));
-
-    char* list_str = (char*) calloc(strlen(str), sizeof(char));
-    strcpy(list_str, str);
-
-    box->string = list_str;
-    box->next = head;
-
-    return box;
-}
-
-// удаление списка
-int list_free(List* lst) {
-
-    if (lst) {
-        List* next = lst->next;
-        free(lst);
-        list_free(next);
-    }
-
-    return 0;
-}
-
 // хэш-функция
 unsigned int rot13(char* str) {
 
@@ -48,6 +23,32 @@ unsigned int rot13(char* str) {
 	hash += (hash << 15);
 
     return hash;
+}
+
+// создание ячейки списка; ячейка встает на голову списка
+List* list_insert(List* head, char* str) {
+    List* box = (List*) malloc(sizeof(List));
+
+    char* list_str = (char*) calloc(strlen(str), sizeof(char));
+    strcpy(list_str, str);
+
+    box->string = list_str;
+    box->hash = rot13(list_str);
+    box->next = head;
+
+    return box;
+}
+
+// удаление списка
+int list_free(List* lst) {
+
+    if (lst) {
+        List* next = lst->next;
+        free(lst);
+        list_free(next);
+    }
+
+    return 0;
 }
 
 int list_dump(List* lst, FILE* log) {
@@ -75,7 +76,7 @@ int ht_dump(HashTable* ht, FILE* log) {
         fprintf(log, "Table size = %lld\n\n", ht->size);
 
         for (long long i = 0; i < ht->size; i++) {
-            fprintf(log, "list(%lld) [%x] ", i, &ht->table[i]);
+            fprintf(log, "lst(%lld) [%x] | hash: (%8x) | ", i, &ht->table[i], ht->table[i]->hash);
             list_dump(ht->table[i], log);
         }
     }
@@ -139,25 +140,11 @@ int ht_search(HashTable* ht, char* str) {
     else {
         printf("data: ");
         puts(lst->string);
-        printf("hash = [%x]\n", rot13(lst->string));
+        printf("hash = [%x]\n", lst->hash);
 
         return 0;
     }
 }
-
-//???
-/*int ht_remove(HashTable* ht, char* str) {
-
-    List* lst = ht_lookup(ht, str);
-
-    if (lst == NULL) {
-        printf("There is no such element in the table\n");
-        free(lst);
-        return 0;
-    }
-
-
-}*/
 
 // удаление таблицы
 int ht_free(HashTable* ht) {
@@ -166,7 +153,6 @@ int ht_free(HashTable* ht) {
         list_free(ht->table[i]);
     }
     free(ht->table);
-    free(ht);
 
     printf("Hash table has been removed successful!\n");
     return 0;

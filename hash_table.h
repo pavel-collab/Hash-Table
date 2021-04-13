@@ -3,6 +3,7 @@
 
 typedef struct _List {
     char* string;
+    unsigned int hash;
     struct _List* next;
 } List;
 
