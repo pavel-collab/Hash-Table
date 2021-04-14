@@ -5,32 +5,6 @@
 
 #include "hash_table.h"
 
-// создание ячейки списка; ячейка встает на голову списка
-List* list_insert(List* head, char* str) {
-    List* box = (List*) malloc(sizeof(List));
-    box->string = str;
-    printf("\n %s \n", box->string);
-    box->next = head;
-    printf("~~~~~~~~~~~~~~~~~~~~\n");
-    printf("box [%x]\n", box);
-    printf("box->next [%x]\n", box->next);
-    printf("~~~~~~~~~~~~~~~~~~~~\n");
-
-    return box;
-}
-
-// удаление списка
-int list_free(List* lst) {
-
-    if (lst) {
-        List* next = lst->next;
-        free(lst);
-        list_free(next);
-    }
-
-    return 0;
-}
-
 // хэш-функция
 unsigned int rot13(char* str) {
 
@@ -51,68 +25,155 @@ unsigned int rot13(char* str) {
     return hash;
 }
 
-int list_dump(List* lst) {
+// создание ячейки списка; ячейка встает на голову списка
+List* list_insert(List* head, char* str) {
+    List* box = (List*) malloc(sizeof(List));
 
-    while (lst != NULL) {
+    char* list_str = (char*) calloc(strlen(str), sizeof(char));
+    strcpy(list_str, str);
 
-        printf("%s -> ", lst->string);
-        lst = lst->next;
+    box->string = list_str;
+    box->hash = rot13(list_str);
+    box->next = head;
+
+    return box;
+}
+
+// удаление списка
+int list_free(List* lst) {
+
+    if (lst) {
+        List* next = lst->next;
+        free(lst);
+        list_free(next);
     }
-    printf("NULL\n");
+
     return 0;
 }
 
-int ht_dump(HashTable* ht) {
+int list_dump(List* lst, FILE* log) {
 
-    printf("\nHash Table DUMP\n");
+    while (lst != NULL) {
+
+        fprintf(log, "%s -> ", lst->string);
+        lst = lst->next;
+    }
+    fprintf(log, "NULL\n");
+    return 0;
+}
+
+int ht_dump(HashTable* ht, FILE* log) {
+
+    fprintf(log, "\n-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n");
+    fprintf(log, "\nHash Table DUMP\n");
     if (ht == NULL) {
-        printf("HT (ERR) (null ptr)\n");
+        fprintf(log, "HT (ERR) (null ptr)\n");
+        return -1;
     }
     else {
-        printf("HT (OK)\n\n");
-        printf("Table ptr [%x]\n", ht);
-        printf("List array ptr [%x]\n", ht->table);
-        printf("Table size = %lld\n\n", ht->size);
+        fprintf(log, "HT (OK)\n\n");
+        fprintf(log, "Table ptr [%x]\n", ht);
+        fprintf(log, "List array ptr [%x]\n", ht->table);
+        fprintf(log, "Table capacity = %lld\n", ht->capacity);
+        fprintf(log, "Table size = %lld\n", ht->size);
+        fprintf(log, "Table fill factor = %0.2f\n\n", ht->fill_fact);
 
-        for (long long i = 0; i < ht->size; i++) {
-            printf("list(%lld) [%x] ", i, &ht->table[i]);
-            list_dump(ht->table[i]);
+        for (long long i = 0; i < ht->capacity; i++) {
+            fprintf(log, "lst(%lld) [%x] ", i, &ht->table[i]);
+            if (ht->table[i]) {
+                fprintf(log, "| hash: (%8x) | ", ht->table[i]->hash);
+            }
+            list_dump(ht->table[i], log);
         }
     }
 
-    printf("\nDUMP end.\n\n");
+    fprintf(log, "\nDUMP end.\n\n");
+    fprintf(log, "-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n\n");
 
     return 0;
 }
 
 // создание хэш-таблицы
-int ht_init(HashTable* ht, long long size) {
+int ht_init(HashTable* ht, long long capacity) {
 
-    ht->table = (List**) calloc(size, sizeof(List*));
+    ht->table = (List**) calloc(capacity, sizeof(List*));
     assert(ht->table != NULL);
 
-    ht->size = size;
+    ht->capacity = capacity;
 
     return 0;
+}
+
+float fill_factor(HashTable* ht) {
+
+    assert(ht->capacity != 0);
+    double fill_fact = (float) ht->size / ht->capacity;
+    return fill_fact;
 }
 
 // поиск элемента в таблице
 List* ht_lookup(HashTable* ht, char* str) {
 
     unsigned int hash = rot13(str);
-    List* lst = ht->table[hash % ht->size]; // встали на нужный список
-    printf("==========================\n");
-    printf("hash = [%x], idx = %d\n", hash, hash % ht->size);
-    printf("list adr [%x]\n", lst);
+    /*printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("hash : (%x)", hash);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");*/
+    List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
 
     while ((lst != NULL) && (strcmp(lst->string, str) != 0)) {
         lst = lst->next;
     }
 
-    printf("returned lst is [%x]\n", lst);
-    printf("==========================\n");
-
     return lst;
+}
+
+int ht_rewriting(HashTable* ht) {
+
+    List* lst = NULL;
+    for (int i = 0; i < ht->capacity; i++) {
+
+        lst = ht->table[i];
+
+        if (lst) {
+            ht->table[i] = NULL;
+            ht->size--;
+            ht_insert(ht, lst->string);
+        }
+        else {
+            lst = NULL;
+        }
+    }
+
+    printf("REWRITING\n");
+    return 0;
+}
+
+int ht_realloc(HashTable* ht) {
+
+    // create local variabe
+    void* local_arrow = realloc(ht->table, ((ht->capacity) * 2) * sizeof(List*));
+
+    // if the local return NULL, there is fail --> abort the program
+    if (local_arrow == NULL) {
+        printf("REALLOCATION FAILED!\n\n");
+        return -1;
+    }
+    else {
+        ht->table = (List**) local_arrow;
+    }
+
+    ht->capacity = ((ht->capacity)*2);
+    ht->fill_fact = fill_factor(ht);
+
+    for (int i = (ht->capacity / 2); i < ht->capacity; i++) {
+        ht->table[i] = NULL;
+    }
+
+    ht_rewriting(ht);
+
+    printf("REALLOCATION\n");
+
+    return 0;
 }
 
 // вставка элемента в таблицу
@@ -125,10 +186,14 @@ int ht_insert(HashTable* ht, char* str) {
         return 0;
     }
 
-    List* head = ht->table[rot13(str) % ht->size];
-    ht->table[rot13(str) % ht->size] = list_insert(head, str);
+    List* head = ht->table[rot13(str) % ht->capacity];
+    ht->table[rot13(str) % ht->capacity] = list_insert(head, str);
+    ht->size++;
+    ht->fill_fact = fill_factor(ht);
 
-    ht_dump(ht);
+    if (ht->fill_fact >= 0.7) {
+        ht_realloc(ht);
+    }
 
     return 0;
 }
@@ -145,30 +210,16 @@ int ht_search(HashTable* ht, char* str) {
     else {
         printf("data: ");
         puts(lst->string);
-        printf("hash = [%x]\n", rot13(lst->string));
+        printf("hash = [%x]\n", lst->hash);
 
         return 0;
     }
 }
 
-//???
-/*int ht_remove(HashTable* ht, char* str) {
-
-    List* lst = ht_lookup(ht, str);
-
-    if (lst == NULL) {
-        printf("There is no such element in the table\n");
-        free(lst);
-        return 0;
-    }
-
-
-}*/
-
 // удаление таблицы
 int ht_free(HashTable* ht) {
 
-    for (int i = 0; i < ht->size; i++) {
+    for (int i = 0; i < ht->capacity; i++) {
         list_free(ht->table[i]);
     }
     free(ht->table);
@@ -180,20 +231,20 @@ int main() {
 
     printf("start of program\n");
 
-    HashTable ht = {NULL, 0};
-    long long size = 10;
-    ht_init(&ht, size);
+    HashTable ht = {NULL, 0, 0, 0};
+    long long capacity = 5;
+    ht_init(&ht, capacity);
 
     char* str = (char*) calloc(10, sizeof(char));
-    for (int i = 0; i < size - 7; i++) {
+    for (int i = 0; i < 6; i++) {
         printf("input string: ");
         gets(str);
-        printf("hash = %x, idx = [%d]\n", rot13(str), rot13(str) % ht.size);
 
         ht_insert(&ht, str);
     }
 
-    ht_dump(&ht);
+
+    DUMP(&ht);
 
     ht_search(&ht, "aaa");
     ht_search(&ht, "bbb");
@@ -210,13 +261,13 @@ int main() {
 //* hash table distruct
 //TODO: верефикатор (проверка, все строки в списке имеют один хэш)
 //TODO: hash functions (one more)
-//TODO: fillfactor       |
+//* fillfactor           |
 //TODO: ht realloc up    |
 //TODO: поиск элемента в таблице
 
 //TODO: извлечение всей цепочки по заданному хэшу
 
-//TODO: dump
+//* dump
 
 //TODO: history log:
 //! классы ++
