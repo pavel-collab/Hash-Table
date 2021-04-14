@@ -127,7 +127,24 @@ List* ht_lookup(HashTable* ht, char* str) {
     return lst;
 }
 
-int rewriting(HashTable* ht) {
+int ht_rewriting(HashTable* ht) {
+
+    List* lst = NULL;
+    for (int i = 0; i < ht->capacity; i++) {
+
+        lst = ht->table[i];
+
+        if (lst) {
+            ht->table[i] = NULL;
+            ht->size--;
+            ht_insert(ht, lst->string);
+        }
+        else {
+            lst = NULL;
+        }
+    }
+
+    printf("REWRITING\n");
     return 0;
 }
 
@@ -151,6 +168,8 @@ int ht_realloc(HashTable* ht) {
     for (int i = (ht->capacity / 2); i < ht->capacity; i++) {
         ht->table[i] = NULL;
     }
+
+    ht_rewriting(ht);
 
     printf("REALLOCATION\n");
 
