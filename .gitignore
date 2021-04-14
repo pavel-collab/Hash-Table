@@ -2,3 +2,4 @@
 *.exe
 sundbox.c
 log.txt
+.vscode

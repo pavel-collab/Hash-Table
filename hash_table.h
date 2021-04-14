@@ -10,7 +10,9 @@ typedef struct _List {
 typedef struct _HashTable {
 
     List** table;             // таблица (указатель на массив списков)
-    long long size;            // размер таблицы
+    long long capacity;            // размер таблицы
+    long long size;
+    float fill_fact;
 
 } HashTable;
 

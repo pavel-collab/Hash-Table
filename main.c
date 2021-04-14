@@ -68,15 +68,21 @@ int ht_dump(HashTable* ht, FILE* log) {
     fprintf(log, "\nHash Table DUMP\n");
     if (ht == NULL) {
         fprintf(log, "HT (ERR) (null ptr)\n");
+        return -1;
     }
     else {
         fprintf(log, "HT (OK)\n\n");
         fprintf(log, "Table ptr [%x]\n", ht);
         fprintf(log, "List array ptr [%x]\n", ht->table);
-        fprintf(log, "Table size = %lld\n\n", ht->size);
+        fprintf(log, "Table capacity = %lld\n", ht->capacity);
+        fprintf(log, "Table size = %lld\n", ht->size);
+        fprintf(log, "Table fill factor = %0.2f\n\n", ht->fill_fact);
 
-        for (long long i = 0; i < ht->size; i++) {
-            fprintf(log, "lst(%lld) [%x] | hash: (%8x) | ", i, &ht->table[i], ht->table[i]->hash);
+        for (long long i = 0; i < ht->capacity; i++) {
+            fprintf(log, "lst(%lld) [%x] ", i, &ht->table[i]);
+            if (ht->table[i]) {
+                fprintf(log, "| hash: (%8x) | ", ht->table[i]->hash);
+            }
             list_dump(ht->table[i], log);
         }
     }
@@ -88,27 +94,67 @@ int ht_dump(HashTable* ht, FILE* log) {
 }
 
 // создание хэш-таблицы
-int ht_init(HashTable* ht, long long size) {
+int ht_init(HashTable* ht, long long capacity) {
 
-    ht->table = (List**) calloc(size, sizeof(List*));
+    ht->table = (List**) calloc(capacity, sizeof(List*));
     assert(ht->table != NULL);
 
-    ht->size = size;
+    ht->capacity = capacity;
 
     return 0;
+}
+
+float fill_factor(HashTable* ht) {
+
+    assert(ht->capacity != 0);
+    double fill_fact = (float) ht->size / ht->capacity;
+    return fill_fact;
 }
 
 // поиск элемента в таблице
 List* ht_lookup(HashTable* ht, char* str) {
 
     unsigned int hash = rot13(str);
-    List* lst = ht->table[hash % ht->size]; // встали на нужный список
+    /*printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("hash : (%x)", hash);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");*/
+    List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
 
     while ((lst != NULL) && (strcmp(lst->string, str) != 0)) {
         lst = lst->next;
     }
 
     return lst;
+}
+
+int rewriting(HashTable* ht) {
+    return 0;
+}
+
+int ht_realloc(HashTable* ht) {
+
+    // create local variabe
+    void* local_arrow = realloc(ht->table, ((ht->capacity) * 2) * sizeof(List*));
+
+    // if the local return NULL, there is fail --> abort the program
+    if (local_arrow == NULL) {
+        printf("REALLOCATION FAILED!\n\n");
+        return -1;
+    }
+    else {
+        ht->table = (List**) local_arrow;
+    }
+
+    ht->capacity = ((ht->capacity)*2);
+    ht->fill_fact = fill_factor(ht);
+
+    for (int i = (ht->capacity / 2); i < ht->capacity; i++) {
+        ht->table[i] = NULL;
+    }
+
+    printf("REALLOCATION\n");
+
+    return 0;
 }
 
 // вставка элемента в таблицу
@@ -121,8 +167,14 @@ int ht_insert(HashTable* ht, char* str) {
         return 0;
     }
 
-    List* head = ht->table[rot13(str) % ht->size];
-    ht->table[rot13(str) % ht->size] = list_insert(head, str);
+    List* head = ht->table[rot13(str) % ht->capacity];
+    ht->table[rot13(str) % ht->capacity] = list_insert(head, str);
+    ht->size++;
+    ht->fill_fact = fill_factor(ht);
+
+    if (ht->fill_fact >= 0.7) {
+        ht_realloc(ht);
+    }
 
     return 0;
 }
@@ -149,7 +201,7 @@ int ht_search(HashTable* ht, char* str) {
 // удаление таблицы
 int ht_free(HashTable* ht) {
 
-    for (int i = 0; i < ht->size; i++) {
+    for (int i = 0; i < ht->capacity; i++) {
         list_free(ht->table[i]);
     }
     free(ht->table);
@@ -162,17 +214,18 @@ int main() {
 
     printf("start of program\n");
 
-    HashTable ht = {NULL, 0};
-    long long size = 5;
-    ht_init(&ht, size);
+    HashTable ht = {NULL, 0, 0, 0};
+    long long capacity = 5;
+    ht_init(&ht, capacity);
 
     char* str = (char*) calloc(10, sizeof(char));
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 6; i++) {
         printf("input string: ");
         gets(str);
 
         ht_insert(&ht, str);
     }
+
 
     DUMP(&ht);
 
@@ -191,7 +244,7 @@ int main() {
 //* hash table distruct
 //TODO: верефикатор (проверка, все строки в списке имеют один хэш)
 //TODO: hash functions (one more)
-//TODO: fillfactor       |
+//* fillfactor           |
 //TODO: ht realloc up    |
 //TODO: поиск элемента в таблице
 
