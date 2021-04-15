@@ -134,14 +134,15 @@ int ht_rewriting(HashTable* ht) {
 
         lst = ht->table[i];
 
-        if (lst) {
+        while (lst) {
             ht->table[i] = NULL;
             ht->size--;
             ht_insert(ht, lst->string);
+
+            lst = lst->next;
         }
-        else {
-            lst = NULL;
-        }
+
+        lst = NULL;
     }
 
     printf("REWRITING\n");
@@ -192,6 +193,7 @@ int ht_insert(HashTable* ht, char* str) {
     ht->fill_fact = fill_factor(ht);
 
     if (ht->fill_fact >= 0.7) {
+        //DUMP(ht);
         ht_realloc(ht);
     }
 
@@ -262,16 +264,13 @@ int main() {
 //TODO: верефикатор (проверка, все строки в списке имеют один хэш)
 //TODO: hash functions (one more)
 //* fillfactor           |
-//TODO: ht realloc up    |
+//* ht realloc up        |
 //TODO: поиск элемента в таблице
 
-//TODO: извлечение всей цепочки по заданному хэшу
+//TODO: извлечение всей цепочки с одним хэшом
 
 //* dump
 
-//TODO: history log:
-//! классы ++
-//! хранение последней примененной функции; ссылки на функции -> один !!!прототип фукции!!!
 
 //TODO: вариант решения коллизий спомощью открытой адресации
 
