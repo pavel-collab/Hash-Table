@@ -9,7 +9,7 @@ typedef struct _List {
 
 typedef struct _HashTable {
 
-    List** table;             // таблица (указатель на массив списков)
+    List** table;                  // таблица (указатель на массив списков)
     long long capacity;            // размер таблицы
     long long size;
     float fill_fact;

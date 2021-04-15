@@ -51,6 +51,7 @@ int list_free(List* lst) {
     return 0;
 }
 
+// дамп отдельного списка
 int list_dump(List* lst, FILE* log) {
 
     while (lst != NULL) {
@@ -62,6 +63,7 @@ int list_dump(List* lst, FILE* log) {
     return 0;
 }
 
+// дамп всей хэш-таблицы
 int ht_dump(HashTable* ht, FILE* log) {
 
     fprintf(log, "\n-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n");
@@ -104,6 +106,7 @@ int ht_init(HashTable* ht, long long capacity) {
     return 0;
 }
 
+// пересчет филл-фактора
 float fill_factor(HashTable* ht) {
 
     assert(ht->capacity != 0);
@@ -115,9 +118,6 @@ float fill_factor(HashTable* ht) {
 List* ht_lookup(HashTable* ht, char* str) {
 
     unsigned int hash = rot13(str);
-    /*printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("hash : (%x)", hash);
-    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");*/
     List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
 
     while ((lst != NULL) && (strcmp(lst->string, str) != 0)) {
@@ -127,6 +127,7 @@ List* ht_lookup(HashTable* ht, char* str) {
     return lst;
 }
 
+// перезапись таблицы (пересчет хэшей после реаллокации)
 int ht_rewriting(HashTable* ht) {
 
     List* lst = NULL;
@@ -149,6 +150,7 @@ int ht_rewriting(HashTable* ht) {
     return 0;
 }
 
+// реаллокация (расширение таблицы)
 int ht_realloc(HashTable* ht) {
 
     // create local variabe
