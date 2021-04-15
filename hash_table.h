@@ -2,17 +2,18 @@
 #define _HASH_TABLE_H
 
 typedef struct _List {
-    char* string;
-    unsigned int hash;
-    struct _List* next;
+    char* key;                     // ключ
+    char* value;                   // значение
+    unsigned int hash;             // хэш
+    struct _List* next;            // указатель на следующий элемент списка
 } List;
 
 typedef struct _HashTable {
 
     List** table;                  // таблица (указатель на массив списков)
     long long capacity;            // размер таблицы
-    long long size;
-    float fill_fact;
+    long long size;                // реальное количество элементов в таблице
+    float fill_fact;               // филлфактор (процент заполненности таблицы)
 
 } HashTable;
 

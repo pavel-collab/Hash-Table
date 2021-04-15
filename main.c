@@ -26,14 +26,17 @@ unsigned int rot13(char* str) {
 }
 
 // создание ячейки списка; ячейка встает на голову списка
-List* list_insert(List* head, char* str) {
+List* list_insert(List* head, char* key, char* value) {
     List* box = (List*) malloc(sizeof(List));
 
-    char* list_str = (char*) calloc(strlen(str), sizeof(char));
-    strcpy(list_str, str);
+    char* list_key = (char*) calloc(strlen(key), sizeof(char));
+    char* list_value = (char*) calloc(strlen(value), sizeof(char));
+    strcpy(list_key, key);
+    strcpy(list_value, value);
 
-    box->string = list_str;
-    box->hash = rot13(list_str);
+    box->key = list_key;
+    box->value = list_value;
+    box->hash = rot13(list_key);
     box->next = head;
 
     return box;
@@ -44,6 +47,8 @@ int list_free(List* lst) {
 
     if (lst) {
         List* next = lst->next;
+        free(lst->key);
+        free(lst->value);
         free(lst);
         list_free(next);
     }
@@ -56,7 +61,7 @@ int list_dump(List* lst, FILE* log) {
 
     while (lst != NULL) {
 
-        fprintf(log, "%s -> ", lst->string);
+        fprintf(log, "key {%s} %s -> ", lst->key, lst->value);
         lst = lst->next;
     }
     fprintf(log, "NULL\n");
@@ -115,12 +120,12 @@ float fill_factor(HashTable* ht) {
 }
 
 // поиск элемента в таблице
-List* ht_lookup(HashTable* ht, char* str) {
+List* ht_lookup(HashTable* ht, char* key, char* value) {
 
-    unsigned int hash = rot13(str);
+    unsigned int hash = rot13(key);
     List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
 
-    while ((lst != NULL) && (strcmp(lst->string, str) != 0)) {
+    while ((lst != NULL) && (strcmp(lst->value, value) != 0)) {
         lst = lst->next;
     }
 
@@ -138,7 +143,7 @@ int ht_rewriting(HashTable* ht) {
         while (lst) {
             ht->table[i] = NULL;
             ht->size--;
-            ht_insert(ht, lst->string);
+            ht_insert(ht, lst->key, lst->value);
 
             lst = lst->next;
         }
@@ -180,17 +185,17 @@ int ht_realloc(HashTable* ht) {
 }
 
 // вставка элемента в таблицу
-int ht_insert(HashTable* ht, char* str) {
+int ht_insert(HashTable* ht, char* key, char* value) {
 
-    List* lst = ht_lookup(ht, str);
+    List* lst = ht_lookup(ht, key, value);
 
     if (lst) {
-        printf("This key already in table.\n");
+        printf("This element already in table.\n");
         return 0;
     }
 
-    List* head = ht->table[rot13(str) % ht->capacity];
-    ht->table[rot13(str) % ht->capacity] = list_insert(head, str);
+    List* head = ht->table[rot13(key) % ht->capacity];
+    ht->table[rot13(key) % ht->capacity] = list_insert(head, key, value);
     ht->size++;
     ht->fill_fact = fill_factor(ht);
 
@@ -202,10 +207,16 @@ int ht_insert(HashTable* ht, char* str) {
     return 0;
 }
 
-//???
-int ht_search(HashTable* ht, char* str) {
+// поиск значения по ключу
+int ht_search(HashTable* ht, char* key) {
 
-    List* lst = ht_lookup(ht, str);
+    unsigned int hash = rot13(key);
+    List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
+
+    
+    while ((lst != NULL) && (strcmp(lst->key, key) != 0)) {
+        lst = lst->next;
+    }
 
     if (lst == NULL) {
         printf("There is no such element in the table\n");
@@ -213,9 +224,9 @@ int ht_search(HashTable* ht, char* str) {
         return 0;
     }
     else {
-        printf("data: ");
-        puts(lst->string);
-        printf("hash = [%x]\n", lst->hash);
+        printf("value: ");
+        puts(lst->value);
+        printf("key: {%s} hash = [%x]\n", lst->key, lst->hash);
 
         return 0;
     }
@@ -241,12 +252,15 @@ int main() {
     long long capacity = 5;
     ht_init(&ht, capacity);
 
-    char* str = (char*) calloc(10, sizeof(char));
+    char* key = (char*) calloc(10, sizeof(char));
+    char* value = (char*) calloc(10, sizeof(char));
     for (int i = 0; i < 6; i++) {
-        printf("input string: ");
-        gets(str);
+        printf("input key: ");
+        gets(key);
+        printf("input value: ");
+        gets(value);
 
-        ht_insert(&ht, str);
+        ht_insert(&ht, key, value);
     }
 
 
@@ -269,7 +283,7 @@ int main() {
 //TODO: hash functions (one more)
 //* fillfactor           |
 //* ht realloc up        |
-//TODO: поиск элемента в таблице
+//* поиск элемента в таблице по ключу
 
 //TODO: извлечение всей цепочки с одним хэшом
 
@@ -279,3 +293,4 @@ int main() {
 //TODO: вариант решения коллизий спомощью открытой адресации
 
 //TODO: unit test
+//TODO: интерфейс
