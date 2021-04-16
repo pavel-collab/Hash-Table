@@ -17,6 +17,36 @@ typedef struct _HashTable {
 
 } HashTable;
 
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+
+unsigned int rot13(char* str);
+
+List* list_insert(List* head, char* key, char* value);
+
+int list_free(List* lst);
+
+int list_dump(List* lst, FILE* log);
+
+int ht_dump(HashTable* ht, FILE* log);
+
+int ht_init(HashTable* ht, long long capacity);
+
+float fill_factor(HashTable* ht);
+
+List* ht_lookup(HashTable* ht, char* key, char* value);
+
+int ht_rewriting(HashTable* ht);
+
+int ht_realloc(HashTable* ht);
+
+int ht_insert(HashTable* ht, char* key, char* value);
+
+int ht_search(HashTable* ht, char* key);
+
+int ht_free(HashTable* ht);
+
+//-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+
 #define DUMP(ht_name) {\
     FILE* log_txt = fopen("log.txt", "a"); \
     assert(log_txt != NULL); \
