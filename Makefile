@@ -4,3 +4,5 @@ test:
 	gcc -o ht ht_lib.o main.o
 debug:
 	gcc -g -o ht main.c
+sundbox:
+	gcc -o sundbox sundbox.c
