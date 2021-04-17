@@ -10,12 +10,12 @@ int main() {
     printf("start of program\n");
 
     HashTable ht = {NULL, 0, 0, 0};
-    long long capacity = 5;
+    long long capacity = 3;
     ht_init(&ht, capacity);
 
     char* key = (char*) calloc(10, sizeof(char));
     char* value = (char*) calloc(10, sizeof(char));
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 5; i++) {
         printf("input key: ");
         gets(key);
         printf("input value: ");
@@ -24,7 +24,7 @@ int main() {
         ht_insert(&ht, key, value);
     }
 
-
+    HASH_TABLE_OK(&ht);
     DUMP(&ht);
 
     ht_search(&ht, "aaa");
