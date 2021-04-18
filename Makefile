@@ -1,4 +1,4 @@
-test:
+hash_table:
 	gcc -c main.c
 	gcc -c ht_lib.c
 	gcc -o ht ht_lib.o main.o
