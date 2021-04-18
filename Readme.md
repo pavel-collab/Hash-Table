@@ -13,8 +13,12 @@ and start with command
 ```
 ./ht
 ```
+or
+```
+./ht.exe
+```
 ___
-This version of program use lists as a variant of resolving collisions. This mean, that pairs with the same indexes (idx = hash(key) % table_size) construct a list in the hash table's cell.
+This hash table version use lists as a variant of resolving collisions. This mean, that pairs with the same indexes (idx = hash(key) % table_size) construct a list in the hash table's cell.
 ___
 There are some simple actions, that you can do with Hash Table:
 - use "Exit" to finish working
@@ -39,7 +43,7 @@ Enter action: HASH string
 ```
 Enter action: LIST 4
 ```
-- use "DUMP" to output all information about hash table; The infirmation will be output to the log named "log.txt" in the curent folder.
+- use "DUMP" to output all information about hash table. The infirmation will be output to the log named "log.txt" in the curent folder.
 
 ## Protection mode.
 There is a protection mode in the programm. This mode switch on verefication and help to find errors such as:
@@ -47,6 +51,7 @@ There is a protection mode in the programm. This mode switch on verefication and
 * Lists pointer address is NULL
 * Amount of elements in the table more than table capacity
 * Hash Table capacity is 0.
+
 If you want to switch on this mode, open file "hash_table.h" and uncomment line 4.
 ```
 //#define DEBUG
