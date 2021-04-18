@@ -60,7 +60,7 @@ int ht_init(HashTable* ht, long long capacity);
 
 float fill_factor(HashTable* ht);
 
-List* ht_lookup(HashTable* ht, char* key);
+List* ht_lookup(HashTable* ht, char* key, char* value);
 
 int ht_rewriting(HashTable* ht);
 
@@ -71,8 +71,6 @@ int ht_insert(HashTable* ht, char* key, char* value);
 int ht_search(HashTable* ht, char* key);
 
 int ht_free(HashTable* ht);
-
-int ht_remove(HashTable* ht, char* key);
 
 int ht_verefication(HashTable* ht);
 
