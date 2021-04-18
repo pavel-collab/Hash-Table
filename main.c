@@ -13,7 +13,7 @@ void print_instruction() {
     printf("GET /*key*/           -- find value by key\n");
     printf("REMOVE /*key*/        -- delete key\n");
     printf("HASH /*string*/       -- get hash of string\n");
-    printf("LISL /*idx*/          -- get list [number]\n");
+    printf("LIST /*idx*/          -- get list [number]\n");
     printf("DUMP                  -- make a dump to log\n\n");
 }
 
@@ -93,6 +93,7 @@ void print_instruction() {
         }\
         else {\
             long long idx = atoll(idx_s);\
+            assert(idx >= 0);\
             if (idx < ht.capacity) {\
                 List* lst = ht.table[idx];\
                 while (lst != NULL) {\
