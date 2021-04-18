@@ -148,8 +148,6 @@ int main() {
             HT_DUMP;
         }
     }
-
-    //DUMP(&ht);
     ht_free(&ht);
 
     return 0;
