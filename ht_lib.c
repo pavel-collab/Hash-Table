@@ -32,6 +32,7 @@ unsigned int rot13(char* str) {
 // создание ячейки списка; ячейка встает на голову списка
 List* list_insert(List* head, char* key, char* value) {
     List* box = (List*) malloc(sizeof(List));
+    assert(box != NULL);
 
     char* list_key = (char*) calloc(strlen(key), sizeof(char));
     char* list_value = (char*) calloc(strlen(value), sizeof(char));
@@ -81,6 +82,8 @@ int list_dump(List* lst, FILE* log) {
 // дамп всей хэш-таблицы
 int ht_dump(HashTable* ht, FILE* log) {
 
+    HASH_TABLE_OK(ht);
+
     fprintf(log, "\n-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n");
     fprintf(log, "\nHash Table DUMP\n");
     if (ht == NULL) {
@@ -107,6 +110,8 @@ int ht_dump(HashTable* ht, FILE* log) {
     fprintf(log, "\nDUMP end.\n\n");
     fprintf(log, "-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_\n\n");
 
+    HASH_TABLE_OK(ht);
+
     return 0;
 }
 
@@ -115,10 +120,12 @@ int ht_dump(HashTable* ht, FILE* log) {
 // создание хэш-таблицы
 int ht_init(HashTable* ht, long long capacity) {
 
+    assert(ht != NULL);
     ht->table = (List**) calloc(capacity, sizeof(List*));
     assert(ht->table != NULL);
 
     ht->capacity = capacity;
+    HASH_TABLE_OK(ht);
 
     return 0;
 }
@@ -127,24 +134,25 @@ int ht_init(HashTable* ht, long long capacity) {
 
 // пересчет филл-фактора
 float fill_factor(HashTable* ht) {
-
+    HASH_TABLE_OK(ht);
     assert(ht->capacity != 0);
     double fill_fact = (float) ht->size / ht->capacity;
     return fill_fact;
+    HASH_TABLE_OK(ht);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // поиск элемента в таблице
-List* ht_lookup(HashTable* ht, char* key, char* value) {
-
+List* ht_lookup(HashTable* ht, char* key) {
+    HASH_TABLE_OK(ht);
     unsigned int hash = rot13(key);
     List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
 
-    while ((lst != NULL) && (strcmp(lst->value, value) != 0)) {
+    while ((lst != NULL) && (strcmp(lst->key, key) != 0)) {
         lst = lst->next;
     }
-
+    HASH_TABLE_OK(ht);
     return lst;
 }
 
@@ -152,14 +160,14 @@ List* ht_lookup(HashTable* ht, char* key, char* value) {
 
 // перезапись таблицы (пересчет хэшей после реаллокации)
 int ht_rewriting(HashTable* ht) {
-
+    HASH_TABLE_OK(ht);
     List* lst = NULL;
     for (int i = 0; i < ht->capacity; i++) {
 
         lst = ht->table[i];
+        ht->table[i] = NULL;
 
         while (lst) {
-            ht->table[i] = NULL;
             ht->size--;
             ht_insert(ht, lst->key, lst->value);
 
@@ -168,8 +176,9 @@ int ht_rewriting(HashTable* ht) {
 
         lst = NULL;
     }
-
+    
     printf("REWRITING\n");
+    HASH_TABLE_OK(ht);
     return 0;
 }
 
@@ -177,7 +186,7 @@ int ht_rewriting(HashTable* ht) {
 
 // реаллокация (расширение таблицы)
 int ht_realloc(HashTable* ht) {
-
+    HASH_TABLE_OK(ht);
     // create local variabe
     void* local_arrow = realloc(ht->table, ((ht->capacity) * 2) * sizeof(List*));
 
@@ -200,6 +209,7 @@ int ht_realloc(HashTable* ht) {
     ht_rewriting(ht);
 
     printf("REALLOCATION\n");
+    HASH_TABLE_OK(ht);
 
     return 0;
 }
@@ -208,11 +218,14 @@ int ht_realloc(HashTable* ht) {
 
 // вставка элемента в таблицу
 int ht_insert(HashTable* ht, char* key, char* value) {
-
-    List* lst = ht_lookup(ht, key, value);
+    HASH_TABLE_OK(ht);
+    List* lst = ht_lookup(ht, key);
 
     if (lst) {
-        printf("This element already in table.\n");
+        //printf("This element already in table.\n");
+        char* box = lst->value;
+        lst->value = value;
+        free(box);
         return 0;
     }
 
@@ -225,7 +238,7 @@ int ht_insert(HashTable* ht, char* key, char* value) {
         //DUMP(ht);
         ht_realloc(ht);
     }
-
+    HASH_TABLE_OK(ht);
     return 0;
 }
 
@@ -233,14 +246,8 @@ int ht_insert(HashTable* ht, char* key, char* value) {
 
 // поиск значения по ключу
 int ht_search(HashTable* ht, char* key) {
-
-    unsigned int hash = rot13(key);
-    List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
-
-    
-    while ((lst != NULL) && (strcmp(lst->key, key) != 0)) {
-        lst = lst->next;
-    }
+    HASH_TABLE_OK(ht);
+    List* lst = ht_lookup(ht, key);
 
     if (lst == NULL) {
         printf("There is no such element in the table\n");
@@ -258,6 +265,38 @@ int ht_search(HashTable* ht, char* key) {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+// удаление элемента списка
+int ht_remove(HashTable* ht, char* key) {
+    HASH_TABLE_OK(ht);
+    unsigned int hash = rot13(key);
+    List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
+
+    if (strcmp(lst->key, key) == 0) {
+        ht->table[hash % ht->capacity] = lst->next;
+        free(lst);
+    }
+    else {
+        while ((lst->next != NULL) && (strcmp(lst->next->key, key) != 0)) {
+            lst = lst->next;
+        }
+
+        if (lst->next == NULL) {
+            printf("There is no such element in the table\n");
+            free(lst);
+            return 0;
+        }
+        else {
+            List* box = lst->next;
+            lst->next = box->next;
+            free(box);
+        }
+    }
+    HASH_TABLE_OK(ht);
+    return 0;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 // удаление таблицы
 int ht_free(HashTable* ht) {
 
@@ -268,4 +307,25 @@ int ht_free(HashTable* ht) {
 
     printf("Hash table has been removed successful!\n");
     return 0;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+int ht_verefication(HashTable* ht) {
+
+    if (ht == NULL)
+        return HT_IS_NULL;
+
+    if (ht->table == NULL)
+        return TABLE_IS_NULL;
+
+    if (ht->size > ht->capacity)
+        return OUT_OF_CAPACITY;
+
+    if (ht->capacity == 0) {
+        return EMPTY_HT;
+    }
+
+    return 0;
+
 }
