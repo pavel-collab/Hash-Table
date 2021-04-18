@@ -92,14 +92,14 @@ int ht_dump(HashTable* ht, FILE* log) {
     }
     else {
         fprintf(log, "HT (OK)\n\n");
-        fprintf(log, "Table ptr [%x]\n", ht);
-        fprintf(log, "List array ptr [%x]\n", ht->table);
+        fprintf(log, "Table ptr [%p]\n", ht);
+        fprintf(log, "List array ptr [%p]\n", ht->table);
         fprintf(log, "Table capacity = %lld\n", ht->capacity);
         fprintf(log, "Table size = %lld\n", ht->size);
         fprintf(log, "Table fill factor = %0.2f\n\n", ht->fill_fact);
 
         for (long long i = 0; i < ht->capacity; i++) {
-            fprintf(log, "lst(%lld) [%x] ", i, &ht->table[i]);
+            fprintf(log, "lst(%lld) [%p] ", i, &ht->table[i]);
             if (ht->table[i]) {
                 fprintf(log, "| hash: (%8x) | ", ht->table[i]->hash);
             }
@@ -264,6 +264,38 @@ int ht_search(HashTable* ht, char* key) {
 
         return 0;
     }
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// удаление элемента списка
+int ht_remove(HashTable* ht, char* key) {
+    HASH_TABLE_OK(ht);
+    unsigned int hash = rot13(key);
+    List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
+
+    if (strcmp(lst->key, key) == 0) {
+        ht->table[hash % ht->capacity] = lst->next;
+        free(lst);
+    }
+    else {
+        while ((lst->next != NULL) && (strcmp(lst->next->key, key) != 0)) {
+            lst = lst->next;
+        }
+
+        if (lst->next == NULL) {
+            printf("There is no such element in the table\n");
+            lst = NULL;
+            return 0;
+        }
+        else {
+            List* box = lst->next;
+            lst->next = box->next;
+            box = NULL;
+        }
+    }
+    HASH_TABLE_OK(ht);
+    return 0;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -55,6 +55,19 @@ void print_instruction() {
     }\
 }
 
+#define REMOVE {\
+    if (strcmp(cmd, "REMOVE") == 0) {\
+        key = strtok(NULL, " \t\n");\
+        if (key == NULL) {\
+            printf("Error, try again.\n\n");\
+            print_instruction();\
+        }\
+        else {\
+            ht_remove(&ht, key);\
+        }\
+    }\
+}
+
 #define HASH {\
     if (strcmp(cmd, "HASH") == 0) {\
         key = strtok(NULL, " \t\n");\
@@ -130,6 +143,7 @@ int main() {
             MENU;
             SET;
             GET;
+            REMOVE;
             HASH;
             LIST;
             HT_DUMP;
