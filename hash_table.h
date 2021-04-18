@@ -3,6 +3,7 @@
 
 //#define DEBUG
 
+// структура элемента списка
 typedef struct _List {
     char* key;                     // ключ
     char* value;                   // значение
@@ -10,6 +11,7 @@ typedef struct _List {
     struct _List* next;            // указатель на следующий элемент списка
 } List;
 
+// структура хэш-таблицы
 typedef struct _HashTable {
 
     List** table;                  // таблица (указатель на массив списков)
