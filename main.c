@@ -125,13 +125,15 @@ int main() {
             printf("Error, try again.\n\n");
             print_instruction();
         }
-        EXIT;
-        MENU;
-        SET;
-        GET;
-        HASH;
-        LIST;
-        HT_DUMP;
+        else {
+            EXIT;
+            MENU;
+            SET;
+            GET;
+            HASH;
+            LIST;
+            HT_DUMP;
+        }
     }
 
     DUMP(&ht);
