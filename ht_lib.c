@@ -220,12 +220,13 @@ int ht_realloc(HashTable* ht) {
 int ht_insert(HashTable* ht, char* key, char* value) {
     HASH_TABLE_OK(ht);
     List* lst = ht_lookup(ht, key);
+    char* box = NULL;
 
-    if (lst) {
+    if (lst && (strcmp(lst->key, key) == 0)) {
         //printf("This element already in table.\n");
-        char* box = lst->value;
+        box = lst->value;
         lst->value = value;
-        free(box);
+        box = NULL;
         return 0;
     }
 
@@ -282,13 +283,13 @@ int ht_remove(HashTable* ht, char* key) {
 
         if (lst->next == NULL) {
             printf("There is no such element in the table\n");
-            free(lst);
+            lst = NULL;
             return 0;
         }
         else {
             List* box = lst->next;
             lst->next = box->next;
-            free(box);
+            box = NULL;
         }
     }
     HASH_TABLE_OK(ht);
