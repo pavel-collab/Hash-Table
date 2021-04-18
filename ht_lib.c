@@ -35,7 +35,9 @@ List* list_insert(List* head, char* key, char* value) {
     assert(box != NULL);
 
     char* list_key = (char*) calloc(strlen(key), sizeof(char));
+    assert(list_key != NULL);
     char* list_value = (char*) calloc(strlen(value), sizeof(char));
+    assert(list_value != NULL);
     strcpy(list_key, key);
     strcpy(list_value, value);
 
@@ -144,12 +146,12 @@ float fill_factor(HashTable* ht) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // поиск элемента в таблице
-List* ht_lookup(HashTable* ht, char* key, char* value) {
+List* ht_lookup(HashTable* ht, char* key) {
     HASH_TABLE_OK(ht);
     unsigned int hash = rot13(key);
     List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
 
-    while ((lst != NULL) && (strcmp(lst->value, value) != 0)) {
+    while ((lst != NULL) && (strcmp(lst->key, key) != 0)) {
         lst = lst->next;
     }
     HASH_TABLE_OK(ht);
@@ -216,13 +218,24 @@ int ht_realloc(HashTable* ht) {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+// обновление поля value элемента списка
+int lst_rewriting(List* lst, char* new_val) {
+    char* box_val = (char*) calloc(strlen(new_val), sizeof(char));
+    assert(box_val != NULL);
+    strcpy(box_val, new_val);
+    lst->value = box_val;
+    return 0;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 // вставка элемента в таблицу
 int ht_insert(HashTable* ht, char* key, char* value) {
     HASH_TABLE_OK(ht);
-    List* lst = ht_lookup(ht, key, value);
+    List* lst = ht_lookup(ht, key);
 
     if (lst) {
-        printf("This element already in table.\n");
+        lst_rewriting(lst, value);
         return 0;
     }
 
