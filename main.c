@@ -11,7 +11,6 @@ void print_instruction() {
     printf("MENU                  -- to show menu\n");
     printf("SET /*key*/ /*value*/ -- set pair: key-calue\n");
     printf("GET /*key*/           -- find value by key\n");
-    printf("REMOVE /*key*/        -- delete key\n");
     printf("HASH /*string*/       -- get hash of string\n");
     printf("LIST /*idx*/          -- get list [number]\n");
     printf("DUMP                  -- make a dump to log\n\n");
@@ -20,19 +19,6 @@ void print_instruction() {
 #define EXIT {\
     if (strcmp(cmd, "Exit") == 0) {\
         break;\
-    }\
-}
-
-#define REMOVE {\
-    if (strcmp(cmd, "REMOVE") == 0) {\
-        key = strtok(NULL, " \t\n");\
-        if (key == NULL) {\
-            printf("Error, try again.\n\n");\
-            print_instruction();\
-        }\
-        else {\
-            ht_remove(&ht, key);\
-        }\
     }\
 }
 
@@ -65,6 +51,19 @@ void print_instruction() {
         }\
         else {\
             ht_search(&ht, key);\
+        }\
+    }\
+}
+
+#define REMOVE {\
+    if (strcmp(cmd, "REMOVE") == 0) {\
+        key = strtok(NULL, " \t\n");\
+        if (key == NULL) {\
+            printf("Error, try again.\n\n");\
+            print_instruction();\
+        }\
+        else {\
+            ht_remove(&ht, key);\
         }\
     }\
 }
@@ -119,6 +118,8 @@ void print_instruction() {
 
 int main() {
 
+    //printf("start of program\n");
+
     HashTable ht = {NULL, 0, 0, 0};
     long long capacity = 10;
     ht_init(&ht, capacity);
@@ -149,7 +150,10 @@ int main() {
             HT_DUMP;
         }
     }
+
+    DUMP(&ht);
     ht_free(&ht);
+    //printf("\nend of program\n");
 
     return 0;
 }
@@ -171,7 +175,7 @@ int main() {
 //TODO: вариант решения коллизий спомощью открытой адресации
 
 //TODO: unit test
-//* интерфейс
+//TODO: интерфейс
 
 //####################################################################
 // макет интерфейса

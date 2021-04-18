@@ -92,14 +92,14 @@ int ht_dump(HashTable* ht, FILE* log) {
     }
     else {
         fprintf(log, "HT (OK)\n\n");
-        fprintf(log, "Table ptr [%x]\n", ht);
-        fprintf(log, "List array ptr [%x]\n", ht->table);
+        fprintf(log, "Table ptr [%p]\n", ht);
+        fprintf(log, "List array ptr [%p]\n", ht->table);
         fprintf(log, "Table capacity = %lld\n", ht->capacity);
         fprintf(log, "Table size = %lld\n", ht->size);
         fprintf(log, "Table fill factor = %0.2f\n\n", ht->fill_fact);
 
         for (long long i = 0; i < ht->capacity; i++) {
-            fprintf(log, "lst(%lld) [%x] ", i, &ht->table[i]);
+            fprintf(log, "lst(%lld) [%p] ", i, &ht->table[i]);
             if (ht->table[i]) {
                 fprintf(log, "| hash: (%8x) | ", ht->table[i]->hash);
             }
@@ -144,12 +144,12 @@ float fill_factor(HashTable* ht) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // поиск элемента в таблице
-List* ht_lookup(HashTable* ht, char* key) {
+List* ht_lookup(HashTable* ht, char* key, char* value) {
     HASH_TABLE_OK(ht);
     unsigned int hash = rot13(key);
     List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
 
-    while ((lst != NULL) && (strcmp(lst->key, key) != 0)) {
+    while ((lst != NULL) && (strcmp(lst->value, value) != 0)) {
         lst = lst->next;
     }
     HASH_TABLE_OK(ht);
@@ -219,14 +219,10 @@ int ht_realloc(HashTable* ht) {
 // вставка элемента в таблицу
 int ht_insert(HashTable* ht, char* key, char* value) {
     HASH_TABLE_OK(ht);
-    List* lst = ht_lookup(ht, key);
-    char* box = NULL;
+    List* lst = ht_lookup(ht, key, value);
 
-    if (lst && (strcmp(lst->key, key) == 0)) {
-        //printf("This element already in table.\n");
-        box = lst->value;
-        lst->value = value;
-        box = NULL;
+    if (lst) {
+        printf("This element already in table.\n");
         return 0;
     }
 
@@ -236,7 +232,7 @@ int ht_insert(HashTable* ht, char* key, char* value) {
     ht->fill_fact = fill_factor(ht);
 
     if (ht->fill_fact >= 0.7) {
-        //DUMP(ht);
+        DUMP(ht);
         ht_realloc(ht);
     }
     HASH_TABLE_OK(ht);
@@ -248,7 +244,13 @@ int ht_insert(HashTable* ht, char* key, char* value) {
 // поиск значения по ключу
 int ht_search(HashTable* ht, char* key) {
     HASH_TABLE_OK(ht);
-    List* lst = ht_lookup(ht, key);
+    unsigned int hash = rot13(key);
+    List* lst = ht->table[hash % ht->capacity]; // встали на нужный список
+
+    
+    while ((lst != NULL) && (strcmp(lst->key, key) != 0)) {
+        lst = lst->next;
+    }
 
     if (lst == NULL) {
         printf("There is no such element in the table\n");
