@@ -60,7 +60,7 @@ int ht_init(HashTable* ht, long long capacity);
 
 float fill_factor(HashTable* ht);
 
-List* ht_lookup(HashTable* ht, char* key, char* value);
+List* ht_lookup(HashTable* ht, char* key);
 
 int ht_rewriting(HashTable* ht);
 
