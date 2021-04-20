@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "hash_table.h"
+#include "unit_test.h"
 
 void print_instruction() {
     printf("\n");
@@ -11,6 +12,7 @@ void print_instruction() {
     printf("MENU                  -- to show menu\n");
     printf("SET /*key*/ /*value*/ -- set pair: key-calue\n");
     printf("GET /*key*/           -- find value by key\n");
+    printf("REMOVE /*key*/        -- remove pain key-value\n");
     printf("HASH /*string*/       -- get hash of string\n");
     printf("LIST /*idx*/          -- get list [number]\n");
     printf("DUMP                  -- make a dump to log\n\n");
@@ -121,8 +123,10 @@ int main() {
     //printf("start of program\n");
 
     HashTable ht = {NULL, 0, 0, 0};
-    long long capacity = 50;
+    long long capacity = 1000;
     ht_init(&ht, capacity);
+
+    TEST(ht);
 
     char* select_act = (char*) calloc(20, sizeof(char));
     char* cmd = (char*) calloc(10, sizeof(char));
