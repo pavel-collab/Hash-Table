@@ -120,8 +120,6 @@ void print_instruction() {
 
 int main() {
 
-    //printf("start of program\n");
-
     HashTable ht = {NULL, 0, 0, 0};
     long long capacity = 1000;
     ht_init(&ht, capacity);
@@ -161,7 +159,6 @@ int main() {
     free(cmd);
     free(key);
     free(value);
-    //printf("\nend of program\n");
 
     return 0;
 }
