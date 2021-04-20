@@ -121,7 +121,7 @@ int main() {
     //printf("start of program\n");
 
     HashTable ht = {NULL, 0, 0, 0};
-    long long capacity = 10;
+    long long capacity = 50;
     ht_init(&ht, capacity);
 
     char* select_act = (char*) calloc(20, sizeof(char));
@@ -153,6 +153,10 @@ int main() {
 
     DUMP(&ht);
     ht_free(&ht);
+    free(select_act);
+    free(cmd);
+    free(key);
+    free(value);
     //printf("\nend of program\n");
 
     return 0;
@@ -167,7 +171,7 @@ int main() {
 //* ht realloc up        |
 //* поиск элемента в таблице по ключу
 
-//TODO: извлечение всей цепочки с одним хэшом
+//* извлечение всей цепочки с одним хэшом
 
 //* dump
 
@@ -175,7 +179,7 @@ int main() {
 //TODO: вариант решения коллизий спомощью открытой адресации
 
 //TODO: unit test
-//TODO: интерфейс
+//* интерфейс
 
 //####################################################################
 // макет интерфейса

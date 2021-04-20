@@ -56,8 +56,8 @@ int list_free(List* lst) {
 
     if (lst) {
         List* next = lst->next;
-        free(lst->key);
-        free(lst->value);
+        //free(lst->key);
+        //free(lst->value);
         free(lst);
         list_free(next);
     }
@@ -98,7 +98,7 @@ int ht_dump(HashTable* ht, FILE* log) {
         fprintf(log, "List array ptr [%p]\n", ht->table);
         fprintf(log, "Table capacity = %lld\n", ht->capacity);
         fprintf(log, "Table size = %lld\n", ht->size);
-        fprintf(log, "Table fill factor = %0.2f\n\n", ht->fill_fact);
+        fprintf(log, "Table fill factor = %0.4f\n\n", ht->fill_fact);
 
         for (long long i = 0; i < ht->capacity; i++) {
             fprintf(log, "lst(%lld) [%p] ", i, &ht->table[i]);
@@ -179,7 +179,7 @@ int ht_rewriting(HashTable* ht) {
         lst = NULL;
     }
     
-    printf("REWRITING\n");
+    //printf("REWRITING\n");
     HASH_TABLE_OK(ht);
     return 0;
 }
@@ -245,7 +245,7 @@ int ht_insert(HashTable* ht, char* key, char* value) {
     ht->fill_fact = fill_factor(ht);
 
     if (ht->fill_fact >= 0.7) {
-        DUMP(ht);
+        //DUMP(ht);
         ht_realloc(ht);
     }
     HASH_TABLE_OK(ht);
